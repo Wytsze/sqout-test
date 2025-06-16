@@ -20,41 +20,53 @@ export const PositionStack: React.FC<PositionStackProps> = ({
     const nameParts = name.split(' ');
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ');
-    return `${firstName.charAt(0)}. ${lastName}`;
+    const formattedName = `${firstName.charAt(0)}. ${lastName}`;
+    
+    // Clamp long names to prevent overflow
+    if (formattedName.length > 12) {
+      return formattedName.substring(0, 11) + '…';
+    }
+    return formattedName;
   };
 
   return (
-    <div className="flex flex-col items-center min-w-32">
-      {/* Position tag with improved styling */}
-      <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 shadow-lg">
+    <div className="flex flex-col items-center min-w-32 max-w-36">
+      {/* Position tag with enhanced styling */}
+      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-full text-xs font-bold mb-3 shadow-lg border border-red-500/30">
         {position}
       </div>
       
-      {/* Player card with enhanced design */}
-      <div className="flex flex-col items-center space-y-1 min-h-20">
+      {/* Player card with enhanced design and overflow protection */}
+      <div className="flex flex-col items-center space-y-1 min-h-24 w-full">
         {topPlayer ? (
           <div
-            className="text-center cursor-pointer hover:bg-gray-700/60 hover:shadow-lg p-3 rounded-lg transition-all duration-200 backdrop-blur-sm border border-gray-700/50 bg-gray-800/40 min-w-28"
+            className="text-center cursor-pointer hover:bg-gray-700/60 hover:shadow-xl p-3 rounded-xl transition-all duration-200 backdrop-blur-sm border border-gray-700/50 bg-gradient-to-b from-gray-800/50 to-gray-800/80 w-full shadow-lg hover:shadow-gray-900/40 hover:scale-105"
             onClick={() => onPlayerSelect(topPlayer)}
+            title={`${topPlayer.name} (${topPlayer.age}) - ${topPlayer.contractUntil}`}
           >
-            <div className="text-xs font-medium text-white flex items-center justify-center gap-1 mb-1">
-              <span className="truncate max-w-20" title={formatPlayerName(topPlayer.name)}>
+            {/* Player name and age with depth indicator */}
+            <div className="text-xs font-semibold text-white mb-1 leading-tight">
+              <div className="truncate">
                 {formatPlayerName(topPlayer.name)} ({topPlayer.age})
-              </span>
-              {additionalPlayersCount > 0 && (
-                <span className="text-green-400 font-bold text-xs ml-1 bg-green-400/20 px-1 rounded">
-                  +{additionalPlayersCount}
-                </span>
-              )}
+                {additionalPlayersCount > 0 && (
+                  <span className="text-green-400 font-bold text-xs ml-1 bg-green-400/20 px-1.5 py-0.5 rounded-full">
+                    +{additionalPlayersCount}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="text-xs text-gray-300 italic">
-              {topPlayer.contractUntil}
+            
+            {/* Contract date */}
+            <div className="text-xs text-gray-300 italic leading-tight">
+              <div className="truncate">
+                {topPlayer.contractUntil}
+              </div>
             </div>
           </div>
         ) : (
-          <div className="text-center p-3 rounded-lg border border-gray-700/50 bg-gray-800/20 min-w-28">
+          <div className="text-center p-3 rounded-xl border border-gray-700/50 bg-gradient-to-b from-gray-800/30 to-gray-800/50 w-full shadow-lg">
             <div className="text-xs text-gray-500 italic">
-              Unavailable
+              No Player
             </div>
           </div>
         )}
