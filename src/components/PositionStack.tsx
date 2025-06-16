@@ -13,6 +13,16 @@ export const PositionStack: React.FC<PositionStackProps> = ({
   players,
   onPlayerSelect
 }) => {
+  const topPlayer = players[0];
+  const additionalPlayersCount = players.length - 1;
+
+  const formatPlayerName = (name: string) => {
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ');
+    return `${firstName.charAt(0)}. ${lastName}`;
+  };
+
   return (
     <div className="flex flex-col items-center min-w-32">
       {/* Position tag */}
@@ -20,23 +30,25 @@ export const PositionStack: React.FC<PositionStackProps> = ({
         {position}
       </div>
       
-      {/* Players stack */}
+      {/* Top player with depth indicator */}
       <div className="flex flex-col items-center space-y-1 min-h-16">
-        {players.length > 0 ? (
-          players.map((player, index) => (
-            <div
-              key={player.id}
-              className="text-center cursor-pointer hover:bg-gray-700 hover:bg-opacity-50 p-1 rounded transition-colors"
-              onClick={() => onPlayerSelect(player)}
-            >
-              <div className="text-xs font-medium text-white">
-                {player.name.split(' ').map(name => name.charAt(0)).join('. ')} ({player.age})
-              </div>
-              <div className="text-xs text-gray-300 italic">
-                {player.contractUntil}
-              </div>
+        {topPlayer ? (
+          <div
+            className="text-center cursor-pointer hover:bg-gray-700 hover:bg-opacity-50 p-2 rounded transition-colors"
+            onClick={() => onPlayerSelect(topPlayer)}
+          >
+            <div className="text-xs font-medium text-white flex items-center gap-1">
+              {formatPlayerName(topPlayer.name)} ({topPlayer.age})
+              {additionalPlayersCount > 0 && (
+                <span className="text-green-400 font-bold">
+                  +{additionalPlayersCount}
+                </span>
+              )}
             </div>
-          ))
+            <div className="text-xs text-gray-300 italic">
+              {topPlayer.contractUntil}
+            </div>
+          </div>
         ) : (
           <div className="text-xs text-gray-400 italic">
             Unavailable

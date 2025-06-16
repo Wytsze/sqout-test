@@ -19,7 +19,15 @@ export const clubsData: Record<string, Club> = {
           "ST": 40,
           "LW": 5,
           "RW": 2
-        }
+        },
+        transferHistory: [{
+          date: "2022-08-31",
+          fromClub: "Cruz Azul",
+          toClub: "Feyenoord",
+          fee: 6000000,
+          age: 21,
+          previousLeague: "Liga MX"
+        }]
       },
       "kokcu01": {
         id: "kokcu01",

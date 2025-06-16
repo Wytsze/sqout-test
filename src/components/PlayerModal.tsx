@@ -2,15 +2,17 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Player } from '@/types/club';
+import { Player, Club } from '@/types/club';
+import { TransferSuggestionService } from '@/services/TransferSuggestionService';
 
 interface PlayerModalProps {
   player: Player;
+  club: Club;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const PlayerModal: React.FC<PlayerModalProps> = ({ player, isOpen, onClose }) => {
+export const PlayerModal: React.FC<PlayerModalProps> = ({ player, club, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('stats');
 
   const mostPlayedPosition = Object.entries(player.matchParticipation)
@@ -20,15 +22,23 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ player, isOpen, onClos
     ? Math.round((mostPlayedPosition[1] / Object.values(player.matchParticipation).reduce((a, b) => a + b, 0)) * 100)
     : 0;
 
-  const suggestions = [
-    { name: "Similar Player 1", age: player.age + 1, value: "$12M" },
-    { name: "Similar Player 2", age: player.age - 2, value: "$8M" },
-    { name: "Similar Player 3", age: player.age + 3, value: "$15M" }
-  ];
+  // Get other players who can play the same position
+  const otherPlayersInPosition = Object.values(club.players)
+    .filter(p => p.id !== player.id && mostPlayedPosition && p.matchParticipation[mostPlayedPosition[0]])
+    .sort((a, b) => (b.matchParticipation[mostPlayedPosition[0]] || 0) - (a.matchParticipation[mostPlayedPosition[0]] || 0));
+
+  const formatPlayerName = (name: string) => {
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ');
+    return `${firstName.charAt(0)}. ${lastName}`;
+  };
+
+  const suggestions = TransferSuggestionService.generateSuggestions(player);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-800 text-white border-gray-700 max-w-md">
+      <DialogContent className="bg-gray-800 text-white border-gray-700 max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-poppins text-xl">
             {player.name}
@@ -41,7 +51,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ player, isOpen, onClos
               Key Stats
             </TabsTrigger>
             <TabsTrigger value="suggestions" className="text-white data-[state=active]:bg-gray-600">
-              Suggestions
+              Transfers
             </TabsTrigger>
           </TabsList>
           
@@ -92,11 +102,34 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ player, isOpen, onClos
                   ))}
               </div>
             </div>
+
+            {mostPlayedPosition && otherPlayersInPosition.length > 0 && (
+              <div>
+                <div className="text-sm text-gray-400 mb-2">
+                  Other players in {mostPlayedPosition[0]}
+                </div>
+                <div className="space-y-2">
+                  {otherPlayersInPosition.map((otherPlayer) => (
+                    <div key={otherPlayer.id} className="bg-gray-700 p-2 rounded">
+                      <div className="text-sm font-medium">
+                        {formatPlayerName(otherPlayer.name)} ({otherPlayer.age})
+                      </div>
+                      <div className="text-xs text-gray-300 italic">
+                        {otherPlayer.contractUntil}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {otherPlayer.matchParticipation[mostPlayedPosition[0]]} min
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="suggestions" className="space-y-4">
             <div className="text-sm text-gray-400 mb-4">
-              AI-generated replacements based on age, playstyle, and market value
+              Transfer suggestions based on historical context and similar deals
             </div>
             
             <div className="space-y-3">
@@ -104,7 +137,13 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ player, isOpen, onClos
                 <div key={index} className="bg-gray-700 p-3 rounded-lg">
                   <div className="font-semibold">{suggestion.name}</div>
                   <div className="text-sm text-gray-300">
-                    Age: {suggestion.age} • Value: {suggestion.value}
+                    Age: {suggestion.age} • Current: {suggestion.currentClub}
+                  </div>
+                  <div className="text-sm text-gray-300">
+                    Fee: {suggestion.estimatedFee}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {suggestion.similarityReason}
                   </div>
                 </div>
               ))}

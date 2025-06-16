@@ -4,21 +4,24 @@ import { ClubSelector } from '@/components/ClubSelector';
 import { FootballPitch } from '@/components/FootballPitch';
 import { PlayerModal } from '@/components/PlayerModal';
 import { clubsData } from '@/data/clubsData';
-import { Player } from '@/types/club';
+import { Player, Club } from '@/types/club';
 
 const Index = () => {
   const [selectedClub, setSelectedClub] = useState<string>('');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedClubData, setSelectedClubData] = useState<Club | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handlePlayerSelect = (player: Player) => {
+  const handlePlayerSelect = (player: Player, club: Club) => {
     setSelectedPlayer(player);
+    setSelectedClubData(club);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedPlayer(null);
+    setSelectedClubData(null);
   };
 
   return (
@@ -41,9 +44,10 @@ const Index = () => {
           />
         )}
         
-        {selectedPlayer && (
+        {selectedPlayer && selectedClubData && (
           <PlayerModal 
             player={selectedPlayer}
+            club={selectedClubData}
             isOpen={isModalOpen}
             onClose={handleCloseModal}
           />

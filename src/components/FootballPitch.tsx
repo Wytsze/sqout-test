@@ -6,7 +6,7 @@ import { PositionStack } from '@/components/PositionStack';
 
 interface FootballPitchProps {
   club: Club;
-  onPlayerSelect: (player: Player) => void;
+  onPlayerSelect: (player: Player, club: Club) => void;
 }
 
 export const FootballPitch: React.FC<FootballPitchProps> = ({ club, onPlayerSelect }) => {
@@ -91,7 +91,7 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({ club, onPlayerSele
                 <PositionStack
                   position={positionLabel}
                   players={playersInPosition}
-                  onPlayerSelect={onPlayerSelect}
+                  onPlayerSelect={(player) => onPlayerSelect(player, club)}
                 />
               </div>
             );
